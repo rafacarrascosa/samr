@@ -1,0 +1,8 @@
+To try out samr it's recommended to install it in a virtualenv.
+samr is written in Python 3.3.
+
+To install:
+pip install -e path/to/samr
+
+To install (for development):
+pip install -e path/to/samr -r docs/setup/requirements-dev.txt
