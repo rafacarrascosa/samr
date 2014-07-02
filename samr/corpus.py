@@ -11,12 +11,10 @@ def _iter_data_file(filename):
     it = csv.reader(open(path, "r"), delimiter="\t")
     row = next(it)  # Drop column names
     if " ".join(row[:3]) != "PhraseId SentenceId Phrase":
-        raise ValueError("Input file has wrong column names", row)
+        raise ValueError("Input file has wrong column names: {}".format(path))
     for row in it:
         if len(row) == 3:
             row += (None,)
-        if len(row) != 4:
-            raise ValueError("Wrong amount of columns in csv: {}".format(path))
         yield Datapoint(*row)
 
 
