@@ -1,0 +1,10 @@
+PhraseId	SentenceId	Phrase	Sentiment
+1	1	El pasillo del vecino	0
+2	2	The cat meows	1
+7	3	A bird just passed my window	2
+6	4		3
+5	5	empty	4
+4	6	single word	4
+3	7	word play	3
+8	8	chea	2
+9	9	che	1
