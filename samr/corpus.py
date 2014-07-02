@@ -2,8 +2,8 @@ import os
 import csv
 import random
 
-from common.data import Datapoint
-from common.settings import DATA_PATH
+from samr.data import Datapoint
+from samr.settings import DATA_PATH
 
 
 def _iter_data_file(filename):
