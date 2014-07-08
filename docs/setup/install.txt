@@ -1,6 +1,9 @@
 To try out samr it's recommended to install it in a virtualenv.
 samr is written in Python 3.3.
 
+Pre-install numpy!
+Pre-install scipy!
+
 To install:
 pip install -e path/to/samr
 
