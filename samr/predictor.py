@@ -4,7 +4,7 @@ from sklearn.linear_model import SGDClassifier
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.pipeline import Pipeline
 
-from samr.transformations import ExtractText
+from samr.transformations import ExtractText, ReplaceText
 
 
 _valid_classifiers = {
@@ -17,15 +17,17 @@ def target(phrases):
 
 
 class PhraseSentimentPredictor:
-    def __init__(self, classifier="sgd", classifier_args=None, lowercase=True):
+    def __init__(self, classifier="sgd", classifier_args=None, lowercase=True,
+                 text_replacements=None):
         if classifier_args is None:
             classifier_args = {}
-        classifier = _valid_classifiers[classifier](**classifier_args)
-        self.pipeline = Pipeline([
-            ("extractor", ExtractText()),
-            ("vectorizer", CountVectorizer(lowercase=lowercase)),
-            ("classifier", classifier)
-        ])
+
+        pipeline = [("extractor", ExtractText())]
+        if text_replacements:
+            pipeline.append(("replacements", ReplaceText(text_replacements)))
+        pipeline.append(("vectorizer", CountVectorizer(lowercase=lowercase)))
+        pipeline.append(("classifier", _valid_classifiers[classifier](**classifier_args)))
+        self.pipeline = Pipeline(pipeline)
 
     def fit(self, phrases, y=None):
         self.pipeline.fit(phrases, target(phrases))
