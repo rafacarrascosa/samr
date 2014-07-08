@@ -3,6 +3,7 @@ from collections import defaultdict
 from sklearn.linear_model import SGDClassifier
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.pipeline import Pipeline
+from sklearn.metrics import accuracy_score
 
 from samr.transformations import ExtractText, ReplaceText
 
@@ -46,3 +47,16 @@ class PhraseSentimentPredictor:
             if phrase.sentiment != predicted:
                 matrix[(phrase.sentiment, predicted)].append(phrase)
         return matrix
+
+
+class _Baseline:
+    def fit(self, X, y=None):
+        return self
+
+    def predict(self, X):
+        return ["2" for _ in X]
+
+    def score(self, X):
+        gold = target(X)
+        pred = self.predict(X)
+        return accuracy_score(gold, pred)
