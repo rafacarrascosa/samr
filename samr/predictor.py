@@ -1,15 +1,17 @@
 from collections import defaultdict
 
 from sklearn.linear_model import SGDClassifier
+from sklearn.neighbors import KNeighborsClassifier
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.pipeline import Pipeline
 from sklearn.metrics import accuracy_score
 
-from samr.transformations import ExtractText, ReplaceText
+from samr.transformations import ExtractText, ReplaceText, MapToSynsets
 
 
 _valid_classifiers = {
     "sgd": SGDClassifier,
+    "knn": KNeighborsClassifier,
 }
 
 
@@ -19,14 +21,18 @@ def target(phrases):
 
 class PhraseSentimentPredictor:
     def __init__(self, classifier="sgd", classifier_args=None, lowercase=True,
-                 text_replacements=None):
+                 text_replacements=None, map_to_synsets=False, binary=False):
         if classifier_args is None:
             classifier_args = {}
 
         pipeline = [("extractor", ExtractText())]
         if text_replacements:
             pipeline.append(("replacements", ReplaceText(text_replacements)))
-        pipeline.append(("vectorizer", CountVectorizer(lowercase=lowercase)))
+        if map_to_synsets:
+            pipeline.append(("synsets", MapToSynsets()))
+        pipeline.append(("vectorizer", CountVectorizer(lowercase=lowercase,
+                                                       binary=binary,
+                                                       tokenizer=lambda x: x.split())))
         pipeline.append(("classifier", _valid_classifiers[classifier](**classifier_args)))
         self.pipeline = Pipeline(pipeline)
 
