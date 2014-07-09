@@ -18,8 +18,10 @@ def _iter_data_file(filename):
         yield Datapoint(*row)
 
 
-def iter_corpus():
-    yield from _iter_data_file("train.tsv")
+def iter_corpus(__cached=[]):
+    if not __cached:
+        __cached.extend(_iter_data_file("train.tsv"))
+    return __cached
 
 
 def iter_test_corpus():
@@ -28,11 +30,20 @@ def iter_test_corpus():
 
 def make_train_test_split(seed, proportion=0.9):
     data = list(iter_corpus())
-    if len(data) < 2:
+    ids = list(set(x.sentenceid for x in data))
+    if len(ids) < 2:
         raise ValueError("Corpus too small to split")
-    N = int(len(data) * proportion)
+    N = int(len(ids) * proportion)
     if N == 0:
         N += 1
     rng = random.Random(seed)
-    rng.shuffle(data)
-    return data[:N], data[N:]
+    rng.shuffle(ids)
+    test_ids = set(ids[N:])
+    train = []
+    test = []
+    for x in data:
+        if x.sentenceid in test_ids:
+            test.append(x)
+        else:
+            train.append(x)
+    return train, test

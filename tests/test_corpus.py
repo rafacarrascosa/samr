@@ -18,8 +18,8 @@ class TestCorpus(TestCase):
     def test_make_train_test_split_simple(self):
         train, test = corpus.make_train_test_split("blitz")
         self.assertIn("word play", [x.phrase for x in train + test])
-        self.assertEqual(len(test), 1)
-        self.assertEqual(len(train + test), 9)
+        self.assertEqual(len(set(x.sentenceid for x in test)), 1)
+        self.assertEqual(len(set(x.sentenceid for x in test + train)), 4)
 
     def test_make_train_test_split_seed_works(self):
         a1, a2 = corpus.make_train_test_split("a")
@@ -29,6 +29,15 @@ class TestCorpus(TestCase):
         self.assertEqual(a2, c2)
         self.assertNotEqual(a1, b1)
         self.assertNotEqual(a2, b2)
+
+    def test_make_train_test_split_no_shared_sentences(self):
+        """
+        Test that train and test don't share sent ids.
+        """
+        train, test = corpus.make_train_test_split("semis")
+        train_ids = set(x.sentenceid for x in train)
+        test_ids = set(x.sentenceid for x in test)
+        self.assertEqual(train_ids & test_ids, set())
 
     def test_iter_test_corpus_simple(self):
         test = list(corpus.iter_test_corpus())
