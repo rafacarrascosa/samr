@@ -1,5 +1,7 @@
 import re
 
+import nltk
+
 
 class ExtractText:
     def fit(self, X, y=None):
@@ -27,3 +29,27 @@ class ReplaceText:
 
     def _repl_fun(self, match):
         return self.rdict[match.group()]
+
+
+class MapToSynsets:
+    def __init__(self):
+        self.stop = set(nltk.corpus.stopwords.words())
+
+    def fit(self, X, y=None):
+        return self
+
+    def transform(self, X):
+        return [self._text_to_synsets(x) for x in X]
+
+    def _text_to_synsets(self, text):
+        result = []
+        for word in text.split():
+            if word not in self.stop:
+                ss = nltk.wordnet.wordnet.synsets(word)
+                if ss:
+                    result.extend(str(s) + "." + str(s.min_depth()) for s in ss)
+                else:
+                    result.append(word.upper())
+            else:
+                result.append(word.upper())
+        return " ".join(result)
