@@ -23,7 +23,8 @@ def target(phrases):
 
 class PhraseSentimentPredictor:
     def __init__(self, classifier="sgd", classifier_args=None, lowercase=True,
-                 text_replacements=None, map_to_synsets=False, binary=False):
+                 text_replacements=None, map_to_synsets=False, binary=False,
+                 min_df=0, ngram=1, stopwords=None):
         if classifier_args is None:
             classifier_args = {}
 
@@ -34,7 +35,10 @@ class PhraseSentimentPredictor:
             pipeline.append(("synsets", MapToSynsets()))
         pipeline.append(("vectorizer", CountVectorizer(lowercase=lowercase,
                                                        binary=binary,
-                                                       tokenizer=lambda x: x.split())))
+                                                       tokenizer=lambda x: x.split(),
+                                                       min_df=min_df,
+                                                       ngram_range=(1, ngram),
+                                                       stop_words=stopwords)))
         pipeline.append(("classifier", _valid_classifiers[classifier](**classifier_args)))
         self.pipeline = Pipeline(pipeline)
 
