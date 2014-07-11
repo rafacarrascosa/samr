@@ -3,6 +3,26 @@ Generate a tsv submission file to kaggle's 'Sentiment Analysis on Movie Reviews'
 competition using the samr module with a given json configuration file.
 """
 
+
+def fix_json_dict(config):
+    new = {}
+    for key, value in config.items():
+        if isinstance(value, dict):
+            value = fix_json_dict(value)
+        elif isinstance(value, str):
+            if value == "true":
+                value = True
+            elif value == "false":
+                value = False
+            else:
+                try:
+                    value = float(value)
+                except ValueError:
+                    pass
+        new[key] = value
+    return new
+
+
 if __name__ == "__main__":
     import argparse
     import json
