@@ -32,9 +32,6 @@ class ReplaceText:
 
 
 class MapToSynsets:
-    def __init__(self):
-        self.stop = set(nltk.corpus.stopwords.words())
-
     def fit(self, X, y=None):
         return self
 
@@ -44,12 +41,7 @@ class MapToSynsets:
     def _text_to_synsets(self, text):
         result = []
         for word in text.split():
-            if word not in self.stop:
-                ss = nltk.wordnet.wordnet.synsets(word)
-                if ss:
-                    result.extend(str(s) + "." + str(s.min_depth()) for s in ss)
-                else:
-                    result.append(word.upper())
-            else:
-                result.append(word.upper())
+            ss = nltk.wordnet.wordnet.synsets(word)
+            result.extend(str(s) for s in ss if ".n." not in str(s))
+            result.append(word)
         return " ".join(result)
