@@ -28,19 +28,14 @@ class PhraseSentimentPredictor:
         if classifier_args is None:
             classifier_args = {}
 
-        pipeline = [("extractor", ExtractText())]
-        if text_replacements:
-            pipeline.append(("replacements", ReplaceText(text_replacements)))
-        if map_to_synsets:
-            pipeline.append(("synsets", MapToSynsets()))
-        pipeline.append(("vectorizer", CountVectorizer(lowercase=lowercase,
-                                                       binary=binary,
-                                                       tokenizer=lambda x: x.split(),
-                                                       min_df=min_df,
-                                                       ngram_range=(1, ngram),
-                                                       stop_words=stopwords)))
+        pipeline = []
+        pipeline.append(("extraction", build_extraction(text_replacements,
+                                                        map_to_synsets,
+                                                        lowercase, binary,
+                                                        min_df, ngram,
+                                                        stopwords)))
         pipeline.append(("classifier", _valid_classifiers[classifier](**classifier_args)))
-        self.pipeline = Pipeline(pipeline)
+        self.pipeline = coolpipe(pipeline)
 
     def fit(self, phrases, y=None):
         self.pipeline.fit(phrases, target(phrases))
@@ -59,6 +54,29 @@ class PhraseSentimentPredictor:
             if phrase.sentiment != predicted:
                 matrix[(phrase.sentiment, predicted)].append(phrase)
         return matrix
+
+
+def build_extraction(text_replacements, map_to_synsets, lowercase, binary,
+                     min_df, ngram, stopwords):
+    pipeline = [("extractor", ExtractText())]
+    if text_replacements:
+        pipeline.append(("replacements", ReplaceText(text_replacements)))
+    if map_to_synsets:
+        pipeline.append(("synsets", MapToSynsets()))
+    pipeline.append(("vectorizer", CountVectorizer(lowercase=lowercase,
+                                                   binary=binary,
+                                                   tokenizer=lambda x: x.split(),
+                                                   min_df=min_df,
+                                                   ngram_range=(1, ngram),
+                                                   stop_words=stopwords)))
+    return coolpipe(pipeline)
+
+
+def coolpipe(steps):
+    pipe = Pipeline(steps)
+    for name, _ in steps:
+        setattr(pipe, name, pipe.named_steps[name])
+    return pipe
 
 
 class _Baseline:
