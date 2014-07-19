@@ -43,5 +43,4 @@ class MapToSynsets:
         for word in text.split():
             ss = nltk.wordnet.wordnet.synsets(word)
             result.extend(str(s) for s in ss if ".n." not in str(s))
-            result.append(word)
         return " ".join(result)

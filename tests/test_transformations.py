@@ -58,6 +58,6 @@ class TestMapToSynsets(TestCase):
         Z = m.transform(X)
         self.assertEqual(len(Z), 1)
         self.assertTrue(isinstance(Z[0], str))
-        for word in X[0].split() + ["light.a.01", "crash.v.01"]:
+        for word in ["light.a.01", "crash.v.01"]:
             self.assertIn(word, Z[0])
         self.assertNotIn("crash.n.02", Z[0])
