@@ -26,12 +26,14 @@ def target(phrases):
 class PhraseSentimentPredictor:
     def __init__(self, classifier="sgd", classifier_args=None, lowercase=True,
                  text_replacements=None, map_to_synsets=False, binary=False,
-                 min_df=0, ngram=1, stopwords=None):
+                 min_df=0, ngram=1, stopwords=None, limit_train=None,
+                 map_to_lex=False):
+        self.limit_train = limit_train
 
         # Build pre-processing common to every extraction
-        pre = ExtractText(lowercase)
+        pipeline = [ExtractText(lowercase)]
         if text_replacements:
-            pre = make_pipeline(pre, ReplaceText(text_replacements))
+            pipeline.append(ReplaceText(text_replacements))
 
         # Build feature extraction schemes
         ext = [build_text_extraction(binary=binary, min_df=min_df,
@@ -39,26 +41,35 @@ class PhraseSentimentPredictor:
         if map_to_synsets:
             ext.append(build_synset_extraction(binary=binary, min_df=min_df,
                                                ngram=ngram, stopwords=stopwords))
-        if map_to_synsets:
-            ext.append(build_synset_extraction(binary=binary, min_df=min_df,
-                                               ngram=ngram, stopwords=stopwords))
+        if map_to_lex:
+            ext.append(build_lex_extraction(binary=binary, min_df=min_df,
+                                            ngram=ngram, stopwords=stopwords))
         ext = make_union(*ext)
+        pipeline.append(ext)
 
         # Build classifier and put everything togheter
         if classifier_args is None:
             classifier_args = {}
         classifier = _valid_classifiers[classifier](**classifier_args)
-        self.pipeline = make_pipeline(pre, ext, classifier)
+        self.pipeline = make_pipeline(*pipeline)
+        self.classifier = classifier
 
     def fit(self, phrases, y=None):
-        self.pipeline.fit(phrases, target(phrases))
+        y = target(phrases)
+        Z = self.pipeline.fit_transform(phrases, y)
+        if self.limit_train:
+            self.classifier.fit(Z[:self.limit_train], y[:self.limit_train])
+        else:
+            self.classifier.fit(Z, y)
         return self
 
     def predict(self, phrases):
-        return self.pipeline.predict(phrases)
+        Z = self.pipeline.transform(phrases)
+        return self.classifier.predict(Z)
 
     def score(self, phrases):
-        return self.pipeline.score(phrases, target(phrases))
+        Z = self.pipeline.transform(phrases)
+        return self.classifier.score(Z, target(phrases))
 
     def error_matrix(self, phrases):
         predictions = self.predict(phrases)
