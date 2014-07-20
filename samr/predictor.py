@@ -4,10 +4,11 @@ from sklearn.linear_model import SGDClassifier
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.svm import SVC
 from sklearn.feature_extraction.text import CountVectorizer
-from sklearn.pipeline import Pipeline
+from sklearn.pipeline import make_pipeline, make_union
 from sklearn.metrics import accuracy_score
 
-from samr.transformations import ExtractText, ReplaceText, MapToSynsets
+from samr.transformations import (ExtractText, ReplaceText, MapToSynsets,
+                                  Densifier, ClassifierOvOAsFeatures)
 from samr.inquirer_lex_transform import InquirerLexTransform
 
 
@@ -26,17 +27,28 @@ class PhraseSentimentPredictor:
     def __init__(self, classifier="sgd", classifier_args=None, lowercase=True,
                  text_replacements=None, map_to_synsets=False, binary=False,
                  min_df=0, ngram=1, stopwords=None):
+
+        # Build pre-processing common to every extraction
+        pre = ExtractText(lowercase)
+        if text_replacements:
+            pre = make_pipeline(pre, ReplaceText(text_replacements))
+
+        # Build feature extraction schemes
+        ext = [build_text_extraction(binary=binary, min_df=min_df,
+                                     ngram=ngram, stopwords=stopwords)]
+        if map_to_synsets:
+            ext.append(build_synset_extraction(binary=binary, min_df=min_df,
+                                               ngram=ngram, stopwords=stopwords))
+        if map_to_synsets:
+            ext.append(build_synset_extraction(binary=binary, min_df=min_df,
+                                               ngram=ngram, stopwords=stopwords))
+        ext = make_union(*ext)
+
+        # Build classifier and put everything togheter
         if classifier_args is None:
             classifier_args = {}
-
-        pipeline = []
-        pipeline.append(("extraction", build_extraction(text_replacements,
-                                                        map_to_synsets,
-                                                        lowercase, binary,
-                                                        min_df, ngram,
-                                                        stopwords, False)))
-        pipeline.append(("classifier", _valid_classifiers[classifier](**classifier_args)))
-        self.pipeline = coolpipe(pipeline)
+        classifier = _valid_classifiers[classifier](**classifier_args)
+        self.pipeline = make_pipeline(pre, ext, classifier)
 
     def fit(self, phrases, y=None):
         self.pipeline.fit(phrases, target(phrases))
@@ -57,32 +69,31 @@ class PhraseSentimentPredictor:
         return matrix
 
 
-def build_extraction(text_replacements, map_to_synsets, lowercase, binary,
-                     min_df, ngram, stopwords, map_to_inquirer_lex):
-    pipeline = [("extractor", ExtractText())]
-    if text_replacements:
-        pipeline.append(("replacements", ReplaceText(text_replacements)))
-    if map_to_synsets and map_to_inquirer_lex:
-        raise ValueError("Invalid configuration mapping to sysnsets "
-                         "and inquirer lex at the same time")
-    if map_to_synsets:
-        pipeline.append(("synsets", MapToSynsets()))
-    if map_to_inquirer_lex:
-        pipeline.append(("inquirer_lex", InquirerLexTransform()))
-    pipeline.append(("vectorizer", CountVectorizer(lowercase=lowercase,
-                                                   binary=binary,
-                                                   tokenizer=lambda x: x.split(),
-                                                   min_df=min_df,
-                                                   ngram_range=(1, ngram),
-                                                   stop_words=stopwords)))
-    return coolpipe(pipeline)
+def build_text_extraction(binary, min_df, ngram, stopwords):
+    return make_pipeline(CountVectorizer(binary=binary,
+                                         tokenizer=lambda x: x.split(),
+                                         min_df=min_df,
+                                         ngram_range=(1, ngram),
+                                         stop_words=stopwords),
+                         ClassifierOvOAsFeatures())
 
 
-def coolpipe(steps):
-    pipe = Pipeline(steps)
-    for name, _ in steps:
-        setattr(pipe, name, pipe.named_steps[name])
-    return pipe
+def build_synset_extraction(binary, min_df, ngram):
+    return make_pipeline(MapToSynsets(),
+                         CountVectorizer(binary=binary,
+                                         tokenizer=lambda x: x.split(),
+                                         min_df=min_df,
+                                         ngram_range=(1, ngram)),
+                         ClassifierOvOAsFeatures())
+
+
+def build_lex_extraction(binary, min_df, ngram):
+    return make_pipeline(InquirerLexTransform(),
+                         CountVectorizer(binary=binary,
+                                         tokenizer=lambda x: x.split(),
+                                         min_df=min_df,
+                                         ngram_range=(1, ngram)),
+                         Densifier())
 
 
 class _Baseline:
