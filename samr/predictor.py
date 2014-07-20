@@ -8,6 +8,7 @@ from sklearn.pipeline import Pipeline
 from sklearn.metrics import accuracy_score
 
 from samr.transformations import ExtractText, ReplaceText, MapToSynsets
+from samr.inquirer_lex_transform import InquirerLexTransform
 
 
 _valid_classifiers = {
@@ -33,7 +34,7 @@ class PhraseSentimentPredictor:
                                                         map_to_synsets,
                                                         lowercase, binary,
                                                         min_df, ngram,
-                                                        stopwords)))
+                                                        stopwords, False)))
         pipeline.append(("classifier", _valid_classifiers[classifier](**classifier_args)))
         self.pipeline = coolpipe(pipeline)
 
@@ -57,12 +58,17 @@ class PhraseSentimentPredictor:
 
 
 def build_extraction(text_replacements, map_to_synsets, lowercase, binary,
-                     min_df, ngram, stopwords):
+                     min_df, ngram, stopwords, map_to_inquirer_lex):
     pipeline = [("extractor", ExtractText())]
     if text_replacements:
         pipeline.append(("replacements", ReplaceText(text_replacements)))
+    if map_to_synsets and map_to_inquirer_lex:
+        raise ValueError("Invalid configuration mapping to sysnsets "
+                         "and inquirer lex at the same time")
     if map_to_synsets:
         pipeline.append(("synsets", MapToSynsets()))
+    if map_to_inquirer_lex:
+        pipeline.append(("inquirer_lex", InquirerLexTransform()))
     pipeline.append(("vectorizer", CountVectorizer(lowercase=lowercase,
                                                    binary=binary,
                                                    tokenizer=lambda x: x.split(),
