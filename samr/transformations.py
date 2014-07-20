@@ -12,8 +12,14 @@ class StatelessTransform:
 
 
 class ExtractText(StatelessTransform):
+    def __init__(self, lowercase=False):
+        self.lowercase = lowercase
+
     def transform(self, X, y=None):
-        return [" ".join(nltk.word_tokenize(datapoint.phrase)) for datapoint in X]
+        it = (" ".join(nltk.word_tokenize(datapoint.phrase)) for datapoint in X)
+        if self.lowercase:
+            return [x.lower() for x in it]
+        return list(it)
 
 
 class ReplaceText(StatelessTransform):
