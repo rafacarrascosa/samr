@@ -75,9 +75,7 @@ class PhraseSentimentPredictor:
         if self.duplicates:
             for i, phrase in enumerate(phrases):
                 label = self.dupes.get(phrase)
-                if label and label != labels[i]:
-                    import sys
-                    print("Dupe hit {!r}, changing {} to {}".format(phrase.phrase, labels[i], label), file=sys.stderr)
+                if label is not None:
                     labels[i] = label
         return labels
 

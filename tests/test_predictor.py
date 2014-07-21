@@ -3,6 +3,7 @@ from unittest import TestCase
 
 from samr import corpus
 from samr.predictor import PhraseSentimentPredictor
+from samr.data import Datapoint
 
 
 TESTDATA_PATH = os.path.join(os.path.dirname(__file__), "data")
@@ -54,3 +55,17 @@ class TestPhraseSentimentPredictor(TestCase):
         N = len(test)
         wrong = sum(len(xs) for xs in error.values())
         self.assertEqual((N - wrong) / N, score)
+
+    def test_simple_duplicates(self):
+        dupe = Datapoint(phraseid="a", sentenceid="b", phrase="b a", sentiment="1")
+        # Train has a lot of "2" sentiments
+        train = [Datapoint(phraseid=str(i),
+                           sentenceid=str(i),
+                           phrase="a b",
+                           sentiment="2") for i in range(10)]
+        train.append(dupe)
+        test = [Datapoint(*dupe)]
+        predictor = PhraseSentimentPredictor(duplicates=True)
+        predictor.fit(train)
+        predicted = predictor.predict(test)[0]
+        self.assertEqual(predicted, "1")
