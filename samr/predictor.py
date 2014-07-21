@@ -29,8 +29,9 @@ class PhraseSentimentPredictor:
     def __init__(self, classifier="sgd", classifier_args=None, lowercase=True,
                  text_replacements=None, map_to_synsets=False, binary=False,
                  min_df=0, ngram=1, stopwords=None, limit_train=None,
-                 map_to_lex=False):
+                 map_to_lex=False, duplicates=False):
         self.limit_train = limit_train
+        self.duplicates = duplicates
 
         # Build pre-processing common to every extraction
         pipeline = [ExtractText(lowercase)]
@@ -58,6 +59,9 @@ class PhraseSentimentPredictor:
 
     def fit(self, phrases, y=None):
         y = target(phrases)
+        if self.duplicates:
+            self.dupes = DuplicatesHandler()
+            self.dupes.fit(phrases, y)
         Z = self.pipeline.fit_transform(phrases, y)
         if self.limit_train:
             self.classifier.fit(Z[:self.limit_train], y[:self.limit_train])
@@ -67,11 +71,19 @@ class PhraseSentimentPredictor:
 
     def predict(self, phrases):
         Z = self.pipeline.transform(phrases)
-        return self.classifier.predict(Z)
+        labels = self.classifier.predict(Z)
+        if self.duplicates:
+            for i, phrase in enumerate(phrases):
+                label = self.dupes.get(phrase)
+                if label and label != labels[i]:
+                    import sys
+                    print("Dupe hit {!r}, changing {} to {}".format(phrase.phrase, labels[i], label), file=sys.stderr)
+                    labels[i] = label
+        return labels
 
     def score(self, phrases):
-        Z = self.pipeline.transform(phrases)
-        return self.classifier.score(Z, target(phrases))
+        pred = self.predict(phrases)
+        return accuracy_score(target(phrases), pred)
 
     def error_matrix(self, phrases):
         predictions = self.predict(phrases)
@@ -107,6 +119,20 @@ def build_lex_extraction(binary, min_df, ngram):
                                          min_df=min_df,
                                          ngram_range=(1, ngram)),
                          Densifier())
+
+
+class DuplicatesHandler:
+    def fit(self, phrases, target):
+        self.dupes = {}
+        for phrase, label in zip(phrases, target):
+            self.dupes[self._key(phrase)] = label
+
+    def get(self, phrase):
+        key = self._key(phrase)
+        return self.dupes.get(key)
+
+    def _key(self, x):
+        return " ".join(x.phrase.lower().split())
 
 
 class _Baseline:
