@@ -9,3 +9,7 @@ pip install -e path/to/samr
 
 To install (for development):
 pip install -e path/to/samr -r docs/setup/requirements-dev.txt
+
+
+Download this: http://www.wjh.harvard.edu/~inquirer/inqtabs.txt
+Page: http://www.wjh.harvard.edu/~inquirer/spreadsheet_guide.htm

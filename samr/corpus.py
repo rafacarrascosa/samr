@@ -30,7 +30,7 @@ def iter_test_corpus():
 
 def make_train_test_split(seed, proportion=0.9):
     data = list(iter_corpus())
-    ids = list(set(x.sentenceid for x in data))
+    ids = list(sorted(set(x.sentenceid for x in data)))
     if len(ids) < 2:
         raise ValueError("Corpus too small to split")
     N = int(len(ids) * proportion)
