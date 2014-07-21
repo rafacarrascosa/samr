@@ -3,6 +3,7 @@ from collections import defaultdict
 from sklearn.linear_model import SGDClassifier
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.svm import SVC
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.pipeline import make_pipeline, make_union
 from sklearn.metrics import accuracy_score
@@ -16,6 +17,7 @@ _valid_classifiers = {
     "sgd": SGDClassifier,
     "knn": KNeighborsClassifier,
     "svc": SVC,
+    "randomforest": RandomForestClassifier,
 }
 
 
@@ -40,10 +42,10 @@ class PhraseSentimentPredictor:
                                      ngram=ngram, stopwords=stopwords)]
         if map_to_synsets:
             ext.append(build_synset_extraction(binary=binary, min_df=min_df,
-                                               ngram=ngram, stopwords=stopwords))
+                                               ngram=ngram))
         if map_to_lex:
             ext.append(build_lex_extraction(binary=binary, min_df=min_df,
-                                            ngram=ngram, stopwords=stopwords))
+                                            ngram=ngram))
         ext = make_union(*ext)
         pipeline.append(ext)
 
