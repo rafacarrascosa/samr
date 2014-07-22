@@ -1,15 +1,48 @@
-To try out samr it's recommended to install it in a virtualenv.
-samr is written in Python 3.3.
+Installation
+============
 
-Pre-install numpy!
-Pre-install scipy!
+`samr` works with Python3.3. If you know the drill, this should be enough:
 
-To install:
-pip install -e path/to/samr
+    git clone https://github.com/rafacarrascosa/samr.git
+    pip install -e samr -r samr/docs/setup/requirements-dev.txt
+    download_3rdparty_data.py
 
-To install (for development):
-pip install -e path/to/samr -r docs/setup/requirements-dev.txt
+If this doesn't work for you, read on.
 
+Full instructions for Ubuntu
+----------------------------
 
-Download this: http://www.wjh.harvard.edu/~inquirer/inqtabs.txt
-Page: http://www.wjh.harvard.edu/~inquirer/spreadsheet_guide.htm
+These instructions will install the development version of samr inside a
+virtualenv and were made for a blank, vanilla Ubuntu 14.04 and tested using
+[Docker](https://www.docker.com/) (Awesome tool btw). They should work
+similarly with other Ubuntu versions and Debian-based OSs.
+
+Open a console and 'cd' into an empty folder of your choice. Now, execute the
+following commands:
+
+Install python 3.3 and compilation requirements for numpy and scipy:
+
+    sudo apt-get update
+    sudo apt-get install software-properties-common
+    sudo add-apt-repository ppa:fkrull/deadsnakes
+    sudo apt-get update
+    sudo apt-get install python3.3 python3.3-dev gfortran libopenblas-dev liblapack-dev git
+
+Create virtualenv and boostrap pip:
+
+    python3.3 -m venv venv
+    source venv/bin/activate
+    wget https://bootstrap.pypa.io/get-pip.py
+    python3.3 get-pip.py
+    echo 'PATH="$VIRTUAL_ENV/local/bin:$PATH"; export PATH' >> venv/bin/activate
+    source venv/bin/activate
+
+Finally, clone and install samr:
+
+    git clone https://github.com/rafacarrascosa/samr.git
+    pip install -e samr -r samr/docs/setup/requirements-dev.txt
+    download_3rdparty_data.py
+
+Optionally run the tests:
+
+    nosetests samr/tests
