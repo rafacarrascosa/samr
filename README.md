@@ -22,7 +22,7 @@ neutral, somewhat positive, positive.
 Some examples:
 
  - **4** (positive): _"They works spectacularly well... A shiver-inducing, nerve-rattling ride."_
- - **3** (somewhat negative): _"rooted in a sincere performance by the title character undergoing midlife crisis"_
+ - **3** (somewhat positive): _"rooted in a sincere performance by the title character undergoing midlife crisis"_
  - **2** (neutral): _"Its everything you would expect -- but nothing more."_
  - **1** (somewhat negative): _"But it does not leave you with much."_
  - **0** (negative): _"The movies progression into rambling incoherence gives new meaning to the phrase fatal script error."_
