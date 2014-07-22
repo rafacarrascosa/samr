@@ -17,5 +17,7 @@ setup(
     author="Rafael Carrascosa",
     packages=["samr"],
     install_requires=reqs,
-    scripts=[]
+    scripts=["scripts/generate_kaggle_submission.py",
+             "scripts/cross_validate_config.py",
+             "scripts/download_3rdparty_data.py"]
 )
