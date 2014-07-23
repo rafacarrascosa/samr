@@ -25,7 +25,7 @@ def iter_corpus(__cached=[]):
 
 
 def iter_test_corpus():
-    yield from _iter_data_file("test.tsv")
+    return list(_iter_data_file("test.tsv"))
 
 
 def make_train_test_split(seed, proportion=0.9):
