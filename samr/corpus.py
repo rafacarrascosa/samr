@@ -19,16 +19,32 @@ def _iter_data_file(filename):
 
 
 def iter_corpus(__cached=[]):
+    """
+    Returns an iterable of `Datapoint`s with the contents of train.tsv.
+    """
     if not __cached:
         __cached.extend(_iter_data_file("train.tsv"))
     return __cached
 
 
 def iter_test_corpus():
+    """
+    Returns an iterable of `Datapoint`s with the contents of test.tsv.
+    """
     return list(_iter_data_file("test.tsv"))
 
 
 def make_train_test_split(seed, proportion=0.9):
+    """
+    Makes a randomized train/test split of the train.tsv corpus with
+    `proportion` fraction of the elements going to train and the rest to test.
+    The `seed` argument controls a shuffling of the corpus prior to splitting.
+    The same seed should always return the same train/test split and different
+    seeds should always provide different train/test splits.
+
+    Return value is a (train, test) tuple where train and test are lists of
+    `Datapoint` instances.
+    """
     data = list(iter_corpus())
     ids = list(sorted(set(x.sentenceid for x in data)))
     if len(ids) < 2:
