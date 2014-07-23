@@ -38,9 +38,9 @@ After installing just run:
 
     generate_kaggle_submission.py samr/data/model2.json > submission.csv
 
-And that will generate a Kaggle submission file that scores `0.65844` on the
+And that will generate a Kaggle submission file that scores near `0.65844` on the
 [leaderboard](http://www.kaggle.com/c/sentiment-analysis-on-movie-reviews/leaderboard)
-(should take 3 minutes, and as of 2014-07-22 is the score of the 2nd place).
+(should take 3 minutes, and as of 2014-07-22 that score is the 2nd place).
 
 The `model2.json` argument above is a configuration file for `samr` that
 determines how the `scikit-learn` pipeline is going to be built and other
@@ -55,7 +55,7 @@ hyperparameters, here is how it looks:
      "duplicates":"true"
     }
 
-You can try `samr` with different configuration files you device (as long as the
+You can try `samr` with different configuration files you make (as long as the
 options are implemented), yielding
 different scores and perhaps even better scores.
 
@@ -82,7 +82,7 @@ And that's it! Want more details? see the code! it's only 350 lines.
 Installation
 ------------
 
-`samr` works with Python3.3. If you know the drill, this should be enough:
+If you know the drill, this should be enough:
 
     git clone https://github.com/rafacarrascosa/samr.git
     pip install -e samr -r samr/docs/setup/requirements-dev.txt
@@ -93,15 +93,19 @@ competition's [data folder](http://www.kaggle.com/c/sentiment-analysis-on-movie-
 and unzip them into the `samr/data` folder. You may be asked to join Kaggle and/or
 accept the competition rules before downloading the data.
 
+Even though `samr` is writen for Python 3.3 it may also work with Python 2.7
+(and the last time I checked it was), but this is not supported and it may
+break in the future.
+
 If the short instructions are not enough, read on.
+
 
 ### Full instructions for Ubuntu
 
-
-These instructions will install the development version of samr inside a
-virtualenv and were thought for a blank, vanilla Ubuntu 14.04 and tested using
-[Docker](https://www.docker.com/) (awesome tool btw). They should work
-more or less unchanged with other Ubuntu versions and Debian-based OSs.
+These instructions will install the development version of `samr` inside a
+Python 3.3 virtualenv and were thought for a blank, vanilla Ubuntu 14.04 and
+tested using [Docker](https://www.docker.com/) (awesome tool btw). They should
+work more or less unchanged with other Ubuntu versions and Debian-based OSs.
 
 Open a console and 'cd' into an empty folder of your choice. Now, execute the
 following commands:
@@ -150,8 +154,11 @@ two exceptions:
 Licensing
 ---------
 
-This project is open-source and BSD licensed, please see the LICENSE file for
-details.
+This project is open-source and BSD licensed, see the LICENSE file for details.
+
+This license basically allows you to do anything, but in case you're wondering:
+I'm ok if you use `samr` to beat my score at the competition, just share back
+what you've learned!
 
 
 Credits
@@ -159,3 +166,4 @@ Credits
 
 This project was developed by Rafael Carrascosa, you can contact me at
 <rafacarrascosa@gmail.com>.
+
