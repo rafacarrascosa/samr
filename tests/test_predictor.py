@@ -10,11 +10,6 @@ TESTDATA_PATH = os.path.join(os.path.dirname(__file__), "data")
 
 
 class TestPhraseSentimentPredictor(TestCase):
-    """
-    PhraseSentimentPredictor is mostly a thin wrapper to scikit-learn, so the
-    tests here are minimalistic.
-    """
-
     def setUp(self):
         self.__original_path = corpus.DATA_PATH
         corpus.DATA_PATH = TESTDATA_PATH
@@ -52,7 +47,7 @@ class TestPhraseSentimentPredictor(TestCase):
 
         score = predictor.score(test)
         assert score > 0, "Test is valid only if score is more than 0"
-        N = len(test)
+        N = float(len(test))
         wrong = sum(len(xs) for xs in error.values())
         self.assertEqual((N - wrong) / N, score)
 

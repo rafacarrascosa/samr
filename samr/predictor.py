@@ -1,3 +1,7 @@
+"""
+SAMR main module, PhraseSentimentPredictor is the class that does the
+prediction and therefore one of the main entry points to the library.
+"""
 from collections import defaultdict
 
 from sklearn.linear_model import SGDClassifier
@@ -26,10 +30,63 @@ def target(phrases):
 
 
 class PhraseSentimentPredictor:
+    """
+    Main `samr` class. It implements a trainable predictor for phrase
+    sentiments. API is a-la scikit-learn, where:
+        - `__init__` configures the predictor
+        - `fit` trains the predictor from data. After calling `fit` the instance
+          methods should be free side-effect.
+        - `predict` generates sentiment predictions.
+        - `score` evaluates classification accuracy from a test set.
+
+    Outline of the predictor pipeline is as follows:
+    A configurable main classifier is trained with a concatenation of 3 kinds of
+    features:
+        - The decision functions of set of vanilla SGDClassifiers trained in a
+          one-versus-others scheme using bag-of-words as features.
+        - (Optionally) The decision functions of set of vanilla SGDClassifiers
+          trained in a one-versus-others scheme using bag-of-words on the
+          wordnet synsets of the words in a phrase.
+        - (Optionally) The amount of "positive" and "negative" words in a phrase
+          as dictated by the Harvard Inquirer sentiment lexicon
+
+    Optionally, during prediction, it also checks for exact duplicates between
+    the training set and the train set.    """
     def __init__(self, classifier="sgd", classifier_args=None, lowercase=True,
                  text_replacements=None, map_to_synsets=False, binary=False,
                  min_df=0, ngram=1, stopwords=None, limit_train=None,
                  map_to_lex=False, duplicates=False):
+        """
+        Parameter description:
+            - `classifier`: The type of classifier used as main classifier,
+              valid values are "sgd", "knn", "svc", "randomforest".
+            - `classifier_args`: A dict to be passed as arguments to the main
+              classifier.
+            - `lowercase`: wheter or not all words are lowercased at the start of
+              the pipeline.
+            - `text_replacements`: A list of tuples `(from, to)` specifying
+              string replacements to be made at the start of the pipeline (after
+              lowercasing).
+            - `map_to_synsets`: Whether or not to use the Wordnet synsets
+              feature set.
+            - `binary`: Whether or not to count words in the bag-of-words
+              representation as 0 or 1.
+            - `min_df`: Minumim frequency a word needs to have to be included
+              in the bag-of-word representation.
+            - `ngram`: The maximum size of ngrams to be considered in the
+              bag-of-words representation.
+            - `stopwords`: A list of words to filter out of the bag-of-words
+              representation. Can also be the string "english", in which case
+              a default list of english stopwords will be used.
+            - `limit_train`: The maximum amount of training samples to give to
+              the main classifier. This can be useful for some slow main
+              classifiers (ex: svc) that converge with less samples to an
+              optimum.
+            - `max_to_lex`: Whether or not to use the Harvard Inquirer lexicon
+              features.
+            - `duplicates`: Whether or not to check for identical phrases between
+              train and prediction.
+        """
         self.limit_train = limit_train
         self.duplicates = duplicates
 
@@ -58,6 +115,11 @@ class PhraseSentimentPredictor:
         self.classifier = classifier
 
     def fit(self, phrases, y=None):
+        """
+        `phrases` should be a list of `Datapoint` instances.
+        `y` should be a list of `str` instances representing the sentiments to
+        be learnt.
+        """
         y = target(phrases)
         if self.duplicates:
             self.dupes = DuplicatesHandler()
@@ -70,6 +132,10 @@ class PhraseSentimentPredictor:
         return self
 
     def predict(self, phrases):
+        """
+        `phrases` should be a list of `Datapoint` instances.
+        Return value is a list of `str` instances with the predicted sentiments.
+        """
         Z = self.pipeline.transform(phrases)
         labels = self.classifier.predict(Z)
         if self.duplicates:
@@ -80,6 +146,11 @@ class PhraseSentimentPredictor:
         return labels
 
     def score(self, phrases):
+        """
+        `phrases` should be a list of `Datapoint` instances.
+        Return value is a `float` with the classification accuracy of the
+        input.
+        """
         pred = self.predict(phrases)
         return accuracy_score(target(phrases), pred)
 

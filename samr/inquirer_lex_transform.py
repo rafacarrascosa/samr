@@ -1,7 +1,9 @@
+#  Explain and drop some links here
 from collections import namedtuple, defaultdict
 import csv
 import os
 
+from samr.transformations import StatelessTransform
 from samr.settings import DATA_PATH
 
 
@@ -31,15 +33,19 @@ InquirerLexEntry = namedtuple("InquirerLexEntry", FIELDS)
 FIELDS = InquirerLexEntry._fields
 
 
-class InquirerLexTransform:
+class InquirerLexTransform(StatelessTransform):
     _corpus = []
     _use_fields = [FIELDS.index(x) for x in "Positiv Negativ IAV Strong".split()]
 
-    def fit(self, X, y=None):
-        return self
-
     def transform(self, X, y=None):
-        corpus = self.get_corpus()
+        """
+        `X` is expected to be a list of `str` instances containing the phrases.
+        Return value is a list of `str` containing different amounts of the
+        words "Positiv_Positiv", "Negativ_Negativ", "IAV_IAV", "Strong_Strong"
+        based on the sentiments given to the input words by the Hardvard
+        Inquirer lexicon.
+        """
+        corpus = self._get_corpus()
         result = []
         for phrase in X:
             newphrase = []
@@ -48,7 +54,11 @@ class InquirerLexTransform:
             result.append(" ".join(newphrase))
         return result
 
-    def get_corpus(self):
+    def _get_corpus(self):
+        """
+        Private method used to cache a dictionary with the Harvard Inquirer
+        corpus.
+        """
         if not self._corpus:
             corpus = defaultdict(list)
             it = csv.reader(open(os.path.join(DATA_PATH, "inquirerbasicttabsclean")),
