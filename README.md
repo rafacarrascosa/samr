@@ -67,7 +67,7 @@ with a concatenation of 3 kinds of features:
  - The [decision functions](http://scikit-learn.org/stable/modules/generated/sklearn.linear_model.SGDClassifier.html#sklearn.linear_model.SGDClassifier.decision_function)
    of set of vanilla SGDClassifiers trained in a one-versus-others scheme using
    [bag-of-words](http://en.wikipedia.org/wiki/Bag-of-words_model) as features.
-   It's classifier inside a classifier, yo dawg!
+   It's classifier inside a classifier, [yo dawg!](http://i.imgur.com/aueqLyL.png)
  - The decision functions of set of vanilla SGDClassifiers trained in a one-versus-others scheme using bag-of-words
    on the [wordnet](http://wordnetweb.princeton.edu/perl/webwn?s=bank) synsets of the words in a phrase.
  - The amount of "positive" and "negative" words in a phrase as dictated by
