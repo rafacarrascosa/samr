@@ -118,7 +118,7 @@ Install python 3.3 and compilation requirements for numpy and scipy:
     sudo apt-get update
     sudo apt-get install -y python3.3 python3.3-dev python-scipy gfortran libopenblas-dev liblapack-dev git wget
 
-Create virtualenv and bootstrap pip:
+Create virtualenv, bootstrap pip and boostrap numpy:
 
     python3.3 -m venv venv
     source venv/bin/activate
@@ -126,6 +126,7 @@ Create virtualenv and bootstrap pip:
     python3.3 get-pip.py
     echo 'PATH="$VIRTUAL_ENV/local/bin:$PATH"; export PATH' >> venv/bin/activate
     source venv/bin/activate
+    pip install numpy==1.8.1
 
 Clone and install samr:
 
