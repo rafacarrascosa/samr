@@ -7,7 +7,11 @@ import numpy
 import re
 
 from sklearn.linear_model import SGDClassifier
-from sklearn.multiclass import fit_ovo
+import sklearn
+if int(sklearn.__version__.split('.')[1]): > 16:
+    from sklearn.multiclass import OneVsOneClassifiermax
+else:
+    from sklearn.multiclass import fit_ovo
 import nltk
 
 
@@ -119,7 +123,10 @@ class ClassifierOvOAsFeatures:
         `X` is expected to be an array-like or a sparse matrix.
         `y` is expected to be an array-like containing the classes to learn.
         """
-        self.classifiers = fit_ovo(SGDClassifier(), X, numpy.array(y), n_jobs=-1)[0]
+        if int(sklearn.__version__.split('.')[1]): > 16:
+            self.classifiers = OneVsOneClassifier(SGDClassifier(), n_jobs=-1).fit(X, numpy.array(y)).estimators_
+        else:
+            self.classifiers = fit_ovo(SGDClassifier(), X, numpy.array(y), n_jobs=-1)[0]
         return self
 
     def transform(self, X, y=None):
